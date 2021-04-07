@@ -10,6 +10,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:dio/dio.dart';
+import 'package:protobuf/protobuf.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:tuple/tuple.dart';
 
@@ -584,6 +585,14 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
                 .statement,
           );
           blocks.add(Code("final value = $_resultVar.data!;"));
+        } else if(_typeChecker(GeneratedMessage).isSuperTypeOf(returnType)) {
+          blocks.add(
+            refer("await $_dioVar.fetch<List<int>>")
+                .call([options])
+                .assignFinal(_resultVar)
+                .statement,
+          );
+          blocks.add(Code("final value = ${_displayString(returnType)}.fromBuffer($_resultVar.data!);"));
         } else {
           blocks.add(
             refer("await $_dioVar.fetch<Map<String,dynamic>>")
