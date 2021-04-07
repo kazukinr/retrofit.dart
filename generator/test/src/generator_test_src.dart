@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:protobuf/protobuf.dart';
 import 'package:source_gen_test/annotations.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:dio/dio.dart';
@@ -271,6 +273,16 @@ abstract class AbstractUser with AbstractUserMixin {
       User.fromJson(json);
 }
 
+abstract class ProtoUser extends GeneratedMessage {
+  factory ProtoUser.fromBuffer(List<int> i) => throw UnimplementedError();
+
+  Uint8List writeToBuffer() => throw UnimplementedError();
+}
+
+class CustomProtoEnum extends ProtobufEnum {
+  CustomProtoEnum(int value, String name) : super(value, name);
+}
+
 @ShouldGenerate(
   r'''
     final value = _result.data!;
@@ -338,6 +350,18 @@ abstract class TestAbstractObjectBodyNullable {
 
 @ShouldGenerate(
   r'''
+    final _data = utf8.decode(user.writeToBuffer(), allowMalformed: true);
+''',
+  contains: true,
+)
+@RestApi(baseUrl: "https://httpbin.org/")
+abstract class TestGeneratedMessageBody {
+  @POST("/users")
+  Future<String> createUser({@Body() ProtoUser user});
+}
+
+@ShouldGenerate(
+  r'''
     final queryParameters = <String, dynamic>{r'u': u.toJson()};
     queryParameters.addAll(user1.toJson());
     queryParameters.addAll(user2.toJson());
@@ -361,6 +385,18 @@ abstract class TestObjectQueries {
   @POST("/users")
   Future<String> createNullableUser(
       @Query('u') User u, {@Queries() User? user3, @Queries() User? user4});
+}
+
+@ShouldGenerate(
+  r'''
+    final queryParameters = <String, dynamic>{r'u': u.value};
+''',
+  contains: true,
+)
+@RestApi(baseUrl: "https://httpbin.org/")
+abstract class TestProtoEnumQueries {
+  @GET("/users")
+  Future<String> getResult(@Query('u') CustomProtoEnum u);
 }
 
 class CustomObject {
@@ -883,4 +919,16 @@ abstract class DynamicInnerListGenericPrimitiveTypeShouldBeCastedRecursively {
 abstract class DynamicInnerGenericTypeShouldBeWithoutGenericArgumentType {
   @PUT("/")
   Future<GenericUserWithoutGenericArgumentFactories<dynamic>> get();
+}
+
+@ShouldGenerate(
+  r'''
+    final value = ProtoUser.fromBuffer(_result.data!);
+''',
+  contains: true,
+)
+@RestApi(baseUrl: "https://httpbin.org/")
+abstract class GeneratedMessageBody {
+  @GET("/xx")
+  Future<ProtoUser> getResult();
 }
