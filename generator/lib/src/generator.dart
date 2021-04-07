@@ -890,11 +890,13 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
               p.type.isDartCoreList ||
               p.type.isDartCoreMap)
           ? refer(p.displayName)
-          : clientAnnotation.parser == retrofit.Parser.DartJsonMapper
-              ? refer(p.displayName)
-              : clientAnnotation.parser == retrofit.Parser.JsonSerializable
-                  ? p.type.nullabilitySuffix == NullabilitySuffix.question ? refer(p.displayName).nullSafeProperty('toJson').call([]) : refer(p.displayName).property('toJson').call([])
-                  : p.type.nullabilitySuffix == NullabilitySuffix.question ? refer(p.displayName).nullSafeProperty('toMap').call([]) : refer(p.displayName).property('toMap').call([]);
+          : _typeChecker(ProtobufEnum).isSuperTypeOf(p.type)
+            ? p.type.nullabilitySuffix == NullabilitySuffix.question ? refer(p.displayName).nullSafeProperty('value') : refer(p.displayName).property('value')
+            : clientAnnotation.parser == retrofit.Parser.DartJsonMapper
+                ? refer(p.displayName)
+                : clientAnnotation.parser == retrofit.Parser.JsonSerializable
+                    ? p.type.nullabilitySuffix == NullabilitySuffix.question ? refer(p.displayName).nullSafeProperty('toJson').call([]) : refer(p.displayName).property('toJson').call([])
+                    : p.type.nullabilitySuffix == NullabilitySuffix.question ? refer(p.displayName).nullSafeProperty('toMap').call([]) : refer(p.displayName).property('toMap').call([]);
       return MapEntry(literalString(key, raw: true), value);
     });
 
@@ -908,11 +910,13 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
       final value =
           (_isBasicType(type) || type.isDartCoreList || type.isDartCoreMap)
               ? refer(displayName)
-              : clientAnnotation.parser == retrofit.Parser.DartJsonMapper
-                  ? refer(displayName)
-                  : clientAnnotation.parser == retrofit.Parser.JsonSerializable
-                      ? type.nullabilitySuffix == NullabilitySuffix.question ? refer(displayName).nullSafeProperty('toJson').call([]) : refer(displayName).property('toJson').call([])
-                      : type.nullabilitySuffix == NullabilitySuffix.question ? refer(displayName).nullSafeProperty('toMap').call([]) : refer(displayName).property('toMap').call([]);
+              : _typeChecker(ProtobufEnum).isSuperTypeOf(type)
+                ? type.nullabilitySuffix == NullabilitySuffix.question ? refer(p.displayName).nullSafeProperty('value') : refer(p.displayName).property('value')
+                : clientAnnotation.parser == retrofit.Parser.DartJsonMapper
+                    ? refer(displayName)
+                    : clientAnnotation.parser == retrofit.Parser.JsonSerializable
+                        ? type.nullabilitySuffix == NullabilitySuffix.question ? refer(displayName).nullSafeProperty('toJson').call([]) : refer(displayName).property('toJson').call([])
+                        : type.nullabilitySuffix == NullabilitySuffix.question ? refer(displayName).nullSafeProperty('toMap').call([]) : refer(displayName).property('toMap').call([]);
 
 
       /// workaround until this is merged in code_builder
