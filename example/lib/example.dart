@@ -66,7 +66,10 @@ abstract class RestClient {
   Future<String> headRequest();
 
   @HEAD('/')
-  Future headRquest2();
+  Future<String?> headRequestNullable();
+
+  @HEAD('/')
+  Future<dynamic> headRquest2();
 
   @HEAD('/')
   Future<HttpResponse> headRquest3();
@@ -76,6 +79,9 @@ abstract class RestClient {
 
   @GET("/task")
   Future<HttpResponse<List<Task>>> getTasksWithReponse();
+
+  @GET("/task")
+  Future<HttpResponse<List<Task>?>> getTasksWithReponseNullable();
 
   @DELETE("/tasks/{id}")
   Future<HttpResponse<void>> deleteTaskWithResponse(@Path() String id);
@@ -140,6 +146,10 @@ abstract class RestClient {
 
   @PUT('/progress')
   Future<String> sendProgress(@CancelRequest() CancelToken cancelToken, {@SendProgress() ProgressCallback? sendProgress});
+
+  @PUT('/boBody')
+  @NoBody()
+  Future<String> sendWithoutBody();
 
 }
 
