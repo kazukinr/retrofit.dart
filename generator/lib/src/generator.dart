@@ -1151,6 +1151,7 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
           var innerType = _genericOf(p.type);
 
           if (_displayString(innerType) == "List<int>") {
+            final fileName = r.peek("fileName")?.stringValue;
             final conType = contentType == null
                 ? ""
                 : 'contentType: MediaType.parse(${literal(contentType)}),';
@@ -1160,6 +1161,7 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
                   ${p.displayName}.map((i) => MapEntry(
                 '${fieldName}',
                 MultipartFile.fromBytes(i,
+                    filename:${literal(fileName ?? null)},
                     ${conType}
                     )))
                   ''')
