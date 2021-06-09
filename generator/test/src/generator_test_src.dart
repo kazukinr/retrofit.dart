@@ -377,9 +377,13 @@ abstract class TestAbstractObjectBodyNullable {
 
 @ShouldGenerate(
   r'''
-    final _data = utf8.decode(user.writeToBuffer(), allowMalformed: true);
+    final _data = user;
 ''',
   contains: true,
+  expectedLogItems: [
+    "ProtoUser is GeneratedMessage.\n"
+    "Remember to set responseDecoder in Dio instance.",
+  ]
 )
 @RestApi(baseUrl: "https://httpbin.org/")
 abstract class TestGeneratedMessageBody {
