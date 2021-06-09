@@ -1011,17 +1011,15 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
               refer("${_bodyName.displayName}?.toMap() ?? <String,dynamic>{}")
             ]).statement);
           }
-        } if (_typeChecker(GeneratedMessage).isSuperTypeOf(_bodyName.type)) {
+        } else if (_typeChecker(GeneratedMessage).isSuperTypeOf(_bodyName.type)) {
           if (_bodyName.type.nullabilitySuffix != NullabilitySuffix.none) {
             log.warning("GeneratedMessage body ${_displayString(_bodyName.type)} can not be nullable.");
           }
-          blocks.add(refer("utf8.decode")
-              .call(
-                [refer("${_bodyName.displayName}.writeToBuffer()")],
-                {'allowMalformed': literalTrue},
-              )
-              .assignFinal(_dataVar)
-              .statement);
+          log.info(
+              "${_displayString(_bodyName.type)} is GeneratedMessage.\n"
+              "Remember to set responseDecoder in Dio instance.");
+          blocks.add(
+              refer(_bodyName.displayName).assignFinal(_dataVar).statement);
         } else {
           final toJson = ele.lookUpMethod('toJson', ele.library);
           if (toJson == null) {
