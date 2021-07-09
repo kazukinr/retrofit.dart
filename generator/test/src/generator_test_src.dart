@@ -788,10 +788,11 @@ abstract class TestModelList {
 @ShouldGenerate(r'''
     final newOptions = newRequestOptions(options);
     newOptions.extra.addAll(_extra);
+    newOptions.headers.addAll(_dio.options.headers);
     newOptions.headers.addAll(<String, dynamic>{});
     await _dio.fetch<void>(newOptions.copyWith(
         method: 'GET',
-        baseUrl: baseUrl,
+        baseUrl: baseUrl ?? _dio.options.baseUrl,
         queryParameters: queryParameters,
         path: '')
       ..data = _data);
@@ -1148,6 +1149,25 @@ abstract class NullableDynamicInnerListGenericTypeShouldBeCastedRecursively {
 abstract class DynamicInnerGenericTypeShouldBeCastedAsMap {
   @PUT("/")
   Future<GenericUser<User>> get();
+}
+
+@ShouldGenerate(
+  r'''
+    final value = GenericUser<GenericUser<User>>.fromJson(
+      _result.data!,
+      (json) => GenericUser<User>.fromJson(
+        json as Map<String, dynamic>,
+        (json) => User.fromJson(json as Map<String, dynamic>),
+      ),
+    );
+    return value;
+  ''',
+  contains: true,
+)
+@RestApi()
+abstract class NestGenericTypeShouldBeCastedRecursively {
+  @PUT("/")
+  Future<GenericUser<GenericUser<User>>> get();
 }
 
 @ShouldGenerate(

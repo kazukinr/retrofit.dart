@@ -162,7 +162,7 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
       });
 
   Iterable<Method> _parseMethods(ClassElement element) =>
-      (element.methods..addAll(element.mixins.expand((i) => i.methods)))
+      (<MethodElement>[]..addAll(element.methods)..addAll(element.mixins.expand((i) => i.methods)))
           .where((MethodElement m) {
         final methodAnnot = _getMethodAnnotation(m);
         return methodAnnot != null &&
@@ -737,9 +737,9 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
               mappedVal += "${_getInnerJsonSerializableMapperFn(arg)}";
             }else{
               if (isGenericArgumentFactories(arg))
-              mappedVal += "(json)=>${_displayString(arg)}.fromJson(json,${_getInnerJsonSerializableMapperFn(arg)}),";
+                mappedVal += "(json)=>${_displayString(arg)}.fromJson(json as Map<String, dynamic>,${_getInnerJsonSerializableMapperFn(arg)}),";
               else
-                mappedVal += "(json)=>${_displayString(arg)}.fromJson(json),";
+                mappedVal += "(json)=>${_displayString(arg)}.fromJson(json as Map<String, dynamic>),";
             }
           else{
             mappedVal += "${_getInnerJsonSerializableMapperFn(arg)}";
@@ -770,6 +770,7 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
       final baseUrl = args.remove(_baseUrlVar)!;
       final cancelToken = args.remove(_cancelToken);
       final sendProgress = args.remove(_onSendProgress);
+      final receiveProgress = args.remove(_onReceiveProgress);
 
       final type = refer(_displayString(_getResponseType(m.returnType)));
 
@@ -779,6 +780,9 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
       }
       if (sendProgress != null){
         composeArguments[_onSendProgress] = sendProgress;
+      }
+      if (receiveProgress != null) {
+        composeArguments[_onReceiveProgress] = receiveProgress;
       }
 
       return refer('_setStreamType').call([
@@ -810,10 +814,20 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
       blocks.add(newOptions
           .property('headers')
           .property('addAll')
-          .call([extraOptions.remove('headers')!]).statement);
+          .call([refer(_dioVar).property('options').property('headers')])
+        .statement);
+      blocks.add(newOptions
+          .property('headers')
+          .property('addAll')
+          .call([extraOptions.remove('headers')!])
+          .statement);
       return newOptions.property('copyWith').call([], Map.from(extraOptions)
         ..[_queryParamsVar] = namedArguments[_queryParamsVar]!
-        ..[_path] = namedArguments[_path]!).cascade('data').assign(namedArguments[_dataVar]!);
+        ..[_path] = namedArguments[_path]!
+        ..[_baseUrlVar] = extraOptions.remove(_baseUrlVar)!.ifNullThen(
+            refer(_dioVar).property('options').property('baseUrl'))
+        ).cascade('data').assign(namedArguments[_dataVar]!
+      );
     }
   }
 
